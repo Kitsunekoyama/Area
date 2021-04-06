@@ -1,0 +1,28 @@
+<!doctype html>
+<style>
+  
+</style>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/main.css') }}">
+        <link rel="icon" href="https://pics.me.me/thumb_nope-tf2-engineer-nope-meme-www-imagessure-com-53745125.png">
+        <title>INDEX</title>
+    </head>
+    <body style="background: -webkit-linear-gradient(to top, #1565C0, #b92b27);background: linear-gradient(to top, #1565C0, #b92b27);">
+        <p class="error">{{ error_msg }}</p>
+        <div style="position:absolute;left:0px;top:10%;font-weight: 700;font-size: 20px;height:20px;width:100%;text-align:center;">
+            A-REA
+        </div>
+        <div style="position:absolute;left:50%;top:30%;transform:translate(-50%, 0%);">
+            <a class="button" href="{{ url_for('login') }}">
+                LOGIN
+            </a>
+        </div>
+        <div style="position:absolute;left:50%;top:50%;transform:translate(-50%, 0%);">
+            <a class="button" href="{{ url_for('register') }}">
+                REGISTER
+            </a>
+        </div>
+    </body>
+</html>

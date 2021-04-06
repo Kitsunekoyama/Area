@@ -1,0 +1,32 @@
+<!doctype html>
+<style>
+  
+</style>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/main.css') }}">
+        <link rel="icon" href="https://c4.wallpaperflare.com/wallpaper/824/285/68/women-portrait-display-artwork-digital-art-wallpaper-preview.jpg">
+        <title>CHOOSE ACTION</title>
+    </head>
+    <body>
+        <div style="z-index:1;position:absolute;left:50px;top:50px;">
+            <a class="button" href="{{ url_for('service') }}">
+                &lt; BACK
+            </a>
+        </div>
+        <div style="z-index:0;position:absolute;left:0px;top:50px;height:200px;width:100%;text-align:center;">
+            <h1 style="z-index:1;">Choose a service</h1>
+        </div>
+        <div style="z-index:0;position:absolute;left:0px;top:200px;height:100%;width:100%;display: flex;justify-content: center;">
+            <div style="height:1200px;width:1200px;display: grid;grid-template-columns: repeat(5, 240px);grid-template-rows: 240px 240px;grid-column-gap: 0px;grid-row-gap: 0px;">
+                {% for s in services %}
+                    <a href="{{ url_for('check_id') }}" style="height:240px;width:240px;color: {{ s.color }};background-color: {{ s.background }};font-weight: 700;display:flex;justify-content: center;align-items: center;flex-direction:column;border: solid white 2px;">
+                        <img src="{{ s.logo }}" style="position:relative;top:30px;height:150px;width:150px;">
+                        <p style="position:relative;bottom:0px;text-align:center;font-size:30px;">{{ s.title }}</p>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </body>
+</html>

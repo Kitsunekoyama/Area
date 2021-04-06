@@ -1,0 +1,22 @@
+<!doctype html>
+<style>
+  
+</style>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/main.css') }}">
+        <link rel="icon" href="https://pics.me.me/thumb_nope-tf2-engineer-nope-meme-www-imagessure-com-53745125.png">
+        <title>LOGIN</title>
+    </head>
+    <body>
+        <div style="z-index:1;position:absolute;left:50px;top:50px;">
+            <form action="{{ url_for('check_id') }}" method="post">
+                <input type="text" name="username" placeholder="Username"></input>
+                <input type="password" name="password" placeholder="Password"></input>
+                <button type="submit">Login</button>
+            </form>
+            <p style="color:red;">{{ error_msg }}</p>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>app.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>app.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <p>Documentation for the web module</p>
+<p>File Handling the front-end of AREA&rsquo;s web interface</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p><strong>Global variables</strong></p>
+<p>ID:                   Server generated UID</p>
+<p>data:                 services and A/R index associated - json</p>
+<p>user_data:            Array of relations - A/R list</p>
+<p>info_action:          Informations about a specific Action (service, action, info)</p>
+<p>info_reaction:        Informations about a specific Reaction (service, reaction, info)</p>
+<p>info_username:        Information about the username (name of the user)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">url_for</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p><strong>Google module</strong></p>
+<p>contains: </p>
+<pre><code>-google function
+
+-google_callback function
+</code></pre>
+<p>google:</p>
+<p>posts the information to the google service at: http://sv:8080/google</p>
+<p>google_callback:</p>
+<p>posts the user information to the authentication page and redirects to the google authentication service at: http://sv:8080/authGoogle</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">ID</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">user_data</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">info_action</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">info_reaction</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">info_username</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">google_redirection</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p><strong>fill_data &amp; index functions</strong></p>
+<p>index:
+calls fill_data</p>
+<p>fill_data:
+fills the data global variable with the services and A/R index associated</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/google&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">google</span><span class="p">():</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;http://sv:8080/google&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">redirect</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">))</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/google_callback&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">google_callback</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">relation</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;http://sv:8080/authGoogle&quot;</span><span class="p">,</span> <span class="n">json</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">ID</span><span class="p">,</span> <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;code&#39;</span><span class="p">)})</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">redirect</span><span class="p">(</span><span class="n">google_redirection</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/fill_data&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">fill_data</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">data</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>jsn = []
+error_msg = []  <br />
+response = requests.get(&ldquo;https://api.jikan.moe/v3/search/anime?q=rezero&rdquo;)
+if response.status_code == 200:
+    jsn = response.json()</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>send and reception info to server</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;http://sv:8080/service&quot;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>check post and get</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">500</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;error server&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Error server&quot;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>convert reception info to json</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">data</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Fill data&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p><strong>logout function</strong></p>
+<p>logout:
+empties the global variables: ID, user_data and info_username</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="n">fill_data</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="o">**</span><span class="nb">locals</span><span class="p">())</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p><strong>login function</strong></p>
+<p>login:
+checks the login information</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/logout&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">logout</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">ID</span>
+    <span class="k">global</span> <span class="n">user_data</span>
+    <span class="k">global</span> <span class="n">info_username</span>
+
+    <span class="n">ID</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">user_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">info_username</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p><strong>register function</strong></p>
+<p>register:
+callows for a user to register</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/login&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span><span class="p">):</span>
+    <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="n">fill_data</span><span class="p">()</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;error&#39;</span><span class="p">):</span>
+        <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Invalid username or password&quot;</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Invalid username or password&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;error_post&#39;</span><span class="p">):</span>
+        <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Bad request method POST&quot;</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Bad request method POST&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;login.html&#39;</span><span class="p">,</span> <span class="o">**</span><span class="nb">locals</span><span class="p">())</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p><strong>check_register function</strong></p>
+<p>check_register:
+posts to the server the information the user filled in the registration page</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/register&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span><span class="p">):</span>
+    <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="n">fill_data</span><span class="p">()</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;error&#39;</span><span class="p">):</span>
+        <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Invalid username or password&quot;</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Invalid username or password&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;error_post&#39;</span><span class="p">):</span>
+        <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Bad request method POST&quot;</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Bad request method POST&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;register.html&#39;</span><span class="p">,</span> <span class="o">**</span><span class="nb">locals</span><span class="p">())</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/check_register&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">check_register</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">ID</span>
+    <span class="k">global</span> <span class="n">info_username</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;CHECK_REGISTER&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p>send and reception info to server</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;http://sv:8080/signUp?username=&quot;</span> <span class="o">+</span> <span class="n">u</span> <span class="o">+</span> <span class="s2">&quot;&amp;password=&quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>check post and get</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">500</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="n">register</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="n">ID</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      <p>convert reception info to json
+r = r.json()</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;GO HUB&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">info_username</span> <span class="o">=</span> <span class="n">u</span>
+        <span class="k">return</span> <span class="n">hub</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">register</span><span class="p">(</span><span class="s1">&#39;error_post&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-17'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-17'>#</a>
+      </div>
+      <p><strong>check_id function</strong></p>
+<p>check_id:
+checks the credentials the user filled in when logging in</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/hub&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">check_id</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">ID</span>
+    <span class="k">global</span> <span class="n">info_username</span>
+
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">]</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-18'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-18'>#</a>
+      </div>
+      <p>send and reception info to server</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;http://sv:8080/login?username=&quot;</span> <span class="o">+</span> <span class="n">u</span> <span class="o">+</span> <span class="s2">&quot;&amp;password=&quot;</span> <span class="o">+</span> <span class="n">p</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-19'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-19'>#</a>
+      </div>
+      <p>check post and get</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="n">ID</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;SUCESS:&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">500</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;ERROR: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="p">),</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+        <span class="n">info_username</span> <span class="o">=</span> <span class="n">u</span>
+        <span class="k">return</span> <span class="n">hub</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error_post&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hub</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-20'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-20'>#</a>
+      </div>
+      <p><strong>hub function</strong></p>
+<p>hub:
+prints out the relations the user chose on the /hub page</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/hub&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">hub</span><span class="p">(</span><span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">user_data</span>
+    <span class="n">zero</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">one</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">user_data</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="n">json</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">ID</span><span class="p">}</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">json</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;http://sv:8080/hub&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">json</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-21'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-21'>#</a>
+      </div>
+      <p>print(&ldquo;r:&rdquo;, file=sys.stderr)
+print(r, file=sys.stderr)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">print</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="n">user_data</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;SUCESS:&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">user_data</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">user_data</span><span class="p">),</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">500</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;ERROR: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="p">),</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;error_delete&#39;</span><span class="p">:</span>
+        <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Error delete&quot;</span>
+    <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;error_activation&#39;</span><span class="p">:</span>
+        <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Error activation&quot;</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;hub.html&#39;</span><span class="p">,</span> <span class="o">**</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">user_data</span><span class="o">=</span><span class="n">user_data</span><span class="p">,</span> <span class="n">info_username</span><span class="o">=</span><span class="n">info_username</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-22'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-22'>#</a>
+      </div>
+      <p><strong>activation function</strong></p>
+<p>activation:
+sets the status of a relation to activated or deactivated</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/activation/&lt;int:status&gt;/&lt;int:n&gt;&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">activation</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">user_data</span>
+
+    <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">user_data</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="n">hub</span><span class="p">(</span><span class="s1">&#39;error_activation&#39;</span><span class="p">)</span>
+    <span class="n">data_to_send</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">ID</span><span class="p">,</span> <span class="s2">&quot;ndx&quot;</span><span class="p">:</span> <span class="n">n</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;http://sv:8080/active&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">data_to_send</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;http://sv:8080/unactive&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">data_to_send</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-23'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-23'>#</a>
+      </div>
+      <p>check post and get</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">user_data</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;ACTIVATION SUCESS&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">500</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">hub</span><span class="p">(</span><span class="s1">&#39;error_activation&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;USER_DATA&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">user_data</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hub</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-24'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-24'>#</a>
+      </div>
+      <p><strong>delete function</strong></p>
+<p>delete:
+deletes the relation</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/delete/&lt;int:n&gt;&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">user_data</span>
+
+    <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">user_data</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="n">hub</span><span class="p">(</span><span class="s1">&#39;error_delete&#39;</span><span class="p">)</span>
+    <span class="n">data_to_send</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">ID</span><span class="p">,</span> <span class="s2">&quot;ndx&quot;</span><span class="p">:</span> <span class="n">n</span><span class="p">}</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-25'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-25'>#</a>
+      </div>
+      <p>send and reception info to server</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;http://sv:8080/delete&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">data_to_send</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-26'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-26'>#</a>
+      </div>
+      <p>check post and get</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">user_data</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;DELETE SUCESS&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">500</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">hub</span><span class="p">(</span><span class="s1">&#39;error_delete&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hub</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-27'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-27'>#</a>
+      </div>
+      <p><strong>service function</strong></p>
+<p>service:
+displays the available services unless the id is empty</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/service&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">service</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;service.html&#39;</span><span class="p">,</span> <span class="o">**</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-28'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-28'>#</a>
+      </div>
+      <p><strong>action function</strong></p>
+<p>-action:
+displays the available actions unless the id is empty</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/action/&lt;int:n&gt;&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">action</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;SELECT ACTION n = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;action.html&#39;</span><span class="p">,</span> <span class="o">**</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-29'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-29'>#</a>
+      </div>
+      <p><strong>config_actions function</strong></p>
+<p>config_actions:
+displays the available options an action has</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/config_action/&lt;int:s&gt;/&lt;int:a&gt;&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">config_action</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;ACTION selected service = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; a = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;len &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">][</span><span class="s2">&quot;action&quot;</span><span class="p">][</span><span class="n">a</span><span class="p">][</span><span class="s2">&quot;arg&quot;</span><span class="p">])),</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;config_action.html&#39;</span><span class="p">,</span> <span class="o">**</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-30'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-30'>#</a>
+      </div>
+      <p><strong>reactions function</strong></p>
+<p>reactions:
+displays the available reactions corresponding to the service and action pair selected</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/reaction/&lt;int:s&gt;/&lt;int:a&gt;&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">reaction</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">info_action</span>
+    <span class="k">global</span> <span class="n">google_redirection</span>
+    <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;REACTION selected service = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; a = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="s1">&#39;info[]&#39;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;[INFO]&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">info_action</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;service&#39;</span> <span class="p">:</span> <span class="n">s</span><span class="p">,</span> <span class="s1">&#39;action&#39;</span> <span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span> <span class="p">:</span> <span class="n">info</span> <span class="p">}</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;[SUCESS] tab_action&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">info_action</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">][</span><span class="s2">&quot;action&quot;</span><span class="p">][</span><span class="n">a</span><span class="p">][</span><span class="s2">&quot;arg&quot;</span><span class="p">])):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">][</span><span class="s2">&quot;action&quot;</span><span class="p">][</span><span class="n">a</span><span class="p">][</span><span class="s2">&quot;arg&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;google&quot;</span><span class="p">):</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;GOOGLE&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+                <span class="n">google_redirection</span> <span class="o">=</span> <span class="s1">&#39;another_service&#39;</span>
+                <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;google&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">another_service</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;[INFO] ERROR !&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hub</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-31'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-31'>#</a>
+      </div>
+      <p><strong>another_service function</strong></p>
+<p>another_service:
+lets the user add another service to add a reaction to, unless the id is empty</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/another_service&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">another_service</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;[INFO] INFO ACTION&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">info_action</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;another_service.html&#39;</span><span class="p">,</span> <span class="o">**</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">info_action</span><span class="o">=</span><span class="n">info_action</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-32'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-32'>#</a>
+      </div>
+      <p><strong>select_reaction and config_reactions functions</strong></p>
+<p>select_reaction:
+displays the available reactions unless the id is empty</p>
+<p>config_reactions:
+displays the available options a reaction has</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/select_reaction/&lt;int:s&gt;&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">select_reaction</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;SELECT REACTION s = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;select_reaction.html&#39;</span><span class="p">,</span> <span class="o">**</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/config_reaction/&lt;int:s&gt;/&lt;int:r&gt;&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">config_reaction</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;config_reaction.html&#39;</span><span class="p">,</span> <span class="o">**</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-33'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-33'>#</a>
+      </div>
+      <p><strong>create function</strong></p>
+<p>create:
+adds a relation once the service, the action, its configuration, the reaction, its corresponding service and configuration are selected</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/create/&lt;int:s&gt;/&lt;int:r&gt;&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">user_data</span>
+    <span class="k">global</span> <span class="n">info_action</span>
+    <span class="k">global</span> <span class="n">info_reaction</span>
+    <span class="k">global</span> <span class="n">google_redirection</span>
+    <span class="k">if</span> <span class="n">ID</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="s1">&#39;info[]&#39;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;[INFO]&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">info_reaction</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;service&#39;</span> <span class="p">:</span> <span class="n">s</span><span class="p">,</span> <span class="s1">&#39;reaction&#39;</span> <span class="p">:</span> <span class="n">r</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span> <span class="p">:</span> <span class="n">info</span> <span class="p">}</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;[SUCESS] tab_action&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">info_reaction</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;[ERROR] POST FAIL&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+
+    <span class="n">new_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;NEW_DATA&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">new_data</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;END NEW DATA&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">new_data</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">info_action</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]][</span><span class="s2">&quot;action&quot;</span><span class="p">][</span><span class="n">info_action</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]][</span><span class="s2">&quot;arg&quot;</span><span class="p">],</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">info_action</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="p">[]:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_data</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">info_action</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]][</span><span class="s2">&quot;action&quot;</span><span class="p">][</span><span class="n">info_action</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]][</span><span class="s2">&quot;arg&quot;</span><span class="p">])):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-34'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-34'>#</a>
+      </div>
+      <p>print(&ldquo;[CHECK] &rdquo; + str(new_data[&ldquo;services&rdquo;][info_action[&ldquo;service&rdquo;]][&ldquo;action&rdquo;][info_action[&ldquo;action&rdquo;]][&ldquo;arg&rdquo;][i]), file=sys.stderr)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">if</span> <span class="n">new_data</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">info_action</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]][</span><span class="s2">&quot;action&quot;</span><span class="p">][</span><span class="n">info_action</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]][</span><span class="s2">&quot;arg&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;oauth&quot;</span><span class="p">:</span>
+                <span class="n">new_data</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">info_action</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]][</span><span class="s2">&quot;action&quot;</span><span class="p">][</span><span class="n">info_action</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]][</span><span class="s2">&quot;arg&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info_action</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">info_reaction</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="p">[]:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_data</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">info_reaction</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]][</span><span class="s2">&quot;reaction&quot;</span><span class="p">][</span><span class="n">info_reaction</span><span class="p">[</span><span class="s2">&quot;reaction&quot;</span><span class="p">]][</span><span class="s2">&quot;arg&quot;</span><span class="p">])):</span>
+            <span class="k">if</span> <span class="n">new_data</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">info_reaction</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]][</span><span class="s2">&quot;reaction&quot;</span><span class="p">][</span><span class="n">info_reaction</span><span class="p">[</span><span class="s2">&quot;reaction&quot;</span><span class="p">]][</span><span class="s2">&quot;arg&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;oauth&quot;</span><span class="p">:</span>
+                <span class="n">new_data</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">info_reaction</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]][</span><span class="s2">&quot;reaction&quot;</span><span class="p">][</span><span class="n">info_reaction</span><span class="p">[</span><span class="s2">&quot;reaction&quot;</span><span class="p">]][</span><span class="s2">&quot;arg&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info_reaction</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+    
+    <span class="n">info_to_send</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">ID</span><span class="p">,</span> <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="n">new_data</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">info_action</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]][</span><span class="s2">&quot;action&quot;</span><span class="p">][</span><span class="n">info_action</span><span class="p">[</span><span class="s2">&quot;action&quot;</span><span class="p">]],</span> <span class="s2">&quot;reaction&quot;</span><span class="p">:</span> <span class="n">new_data</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">info_reaction</span><span class="p">[</span><span class="s2">&quot;service&quot;</span><span class="p">]][</span><span class="s2">&quot;reaction&quot;</span><span class="p">][</span><span class="n">info_reaction</span><span class="p">[</span><span class="s2">&quot;reaction&quot;</span><span class="p">]]}</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="n">info_to_send</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-35'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-35'>#</a>
+      </div>
+      <p>send and reception info to server</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;[BEFORE SEND INFO SERVER]&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;http://sv:8080/create&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">info_to_send</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;[AFTER SEND INFO SERVER]&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="n">info_action</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">info_reaction</span> <span class="o">=</span> <span class="p">[]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-36'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-36'>#</a>
+      </div>
+      <p>check post and get</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-37'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-37'>#</a>
+      </div>
+      <p>convert reception info to json</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">user_data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;SUCESS CREATE&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">user_data</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">][</span><span class="s2">&quot;reaction&quot;</span><span class="p">][</span><span class="n">r</span><span class="p">][</span><span class="s2">&quot;arg&quot;</span><span class="p">])):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;services&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">][</span><span class="s2">&quot;reaction&quot;</span><span class="p">][</span><span class="n">r</span><span class="p">][</span><span class="s2">&quot;arg&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;google&quot;</span><span class="p">):</span>
+                <span class="k">print</span><span class="p">(</span><span class="s2">&quot;GOOGLE&quot;</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+                <span class="n">google_redirection</span> <span class="o">=</span> <span class="s1">&#39;hub&#39;</span>
+                <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;google&#39;</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">500</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">login</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hub</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-38'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-38'>#</a>
+      </div>
+      <p><strong>error function</strong></p>
+<p>error:
+displays an error page with the 404 error code</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.errorhandler</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;error.html&#39;</span><span class="p">),</span> <span class="mi">404</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-39'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-39'>#</a>
+      </div>
+      <p><strong>debug function</strong></p>
+<p>debug:
+displays a page with essential debug information such as the data, user_data and id</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/debug&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">debug</span><span class="p">():</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">user_data</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">data</span> <span class="o">!=</span> <span class="p">[]):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">user_data</span> <span class="o">!=</span> <span class="p">[]):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">user_data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ID</span> <span class="o">!=</span> <span class="p">[]):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">ID</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;debug&quot;</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;/test&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://api.jikan.moe/v3/search/anime?q=&quot;</span>
+    <span class="n">animeID</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">animeID</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;anime_name&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">animeID</span> <span class="o">=</span> <span class="s2">&quot;re:zero&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span> <span class="o">+</span> <span class="n">animeID</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">jsn</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">jsn</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;test.html&#39;</span><span class="p">,</span> <span class="o">**</span><span class="nb">locals</span><span class="p">())</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">threaded</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

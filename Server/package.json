@@ -1,0 +1,39 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kitsunekoyama",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "connect-flash": "^0.1.1",
+    "cors": "^2.8.5",
+    "discord.js": "^12.5.1",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "express-ejs-layouts": "^2.5.0",
+    "express-session": "^1.17.1",
+    "google-auth-library": "^7.0.2",
+    "googleapis": "^67.1.0",
+    "login-with-twitter": "^1.2.4",
+    "mongoose": "^5.11.0",
+    "mysql": "^2.18.1",
+    "needle": "^2.6.0",
+    "node-localstorage": "^2.1.6",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "react-native": "^0.64.0",
+    "reddit-wrapper-v2": "^1.1.6",
+    "snoowrap": "^1.22.0",
+    "steamapi": "^2.1.2",
+    "twit": "^2.2.11",
+    "twitch": "^4.5.0",
+    "twitch-auth": "^4.5.0",
+    "uuid": "^8.3.2",
+    "weather-js": "^2.0.0"
+  }
+}

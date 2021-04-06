@@ -1,0 +1,26 @@
+<!doctype html>
+<style>
+  
+</style>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/main.css') }}">
+        <link rel="icon" href="https://pics.me.me/thumb_nope-tf2-engineer-nope-meme-www-imagessure-com-53745125.png">
+        <title>TEST</title>
+    </head>
+    <body>
+        <div style="position:absolute;top:50px;left:10px;color:white;font-family:sans-serif;">
+            <p>Hello There !</p>
+            <form action="{{ url_for('test') }}" method="post">
+                <input type="text" name="anime_name" placeholder="Anime name"></input>
+                <input type="submit"></input>
+            </form>
+            <p>{{ data[0]['title'] }}</p>
+            <a href="{{ data[0]['url'] }}">
+                <img src="{{ data[0]['image_url'] }}"/>
+            </a>
+            <p>{{ data[0]['synopsis'] }}</p>
+        </div>
+    </body>
+</html>

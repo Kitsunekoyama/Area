@@ -1,0 +1,346 @@
+Object {
+    "serv": Object {
+      "services": Array [
+        Object {
+          "action": Array [
+            Object {
+              "arg": Array [
+                Object {
+                  "name": "",
+                  "type": "",
+                  "value": "",
+                },
+                Object {
+                  "name": "",
+                  "type": "",
+                  "value": "",
+                },
+                Object {
+                  "name": "",
+                  "type": "",
+                  "value": "",
+                },
+              ],
+              "descr": "Trigger every day at x hours and y min",
+              "id": 0,
+              "name": "EveryDayAt",
+            },
+            Object {
+              "arg": Array [
+                Object {
+                  "name": "",
+                  "type": "",
+                  "value": "",
+                },
+                Object {
+                  "name": "",
+                  "type": "",
+                  "value": "",
+                },
+                Object {
+                  "name": "",
+                  "type": "",
+                  "value": "",
+                },
+              ],
+              "descr": "Trigger every year at x day and x month",
+              "id": 1,
+              "name": "EveryYearAt",
+            },
+          ],
+          "color": "#333333",
+          "id": 0,
+          "logo": "https://assets.ifttt.com/images/channels/3/icons/monochrome_large.png",
+          "name": "DateTime",
+          "reaction": Array [],
+        },
+        Object {
+          "action": Array [
+            Object {
+              "arg": Array [
+                Object {
+                  "name": "token",
+                  "type": "id",
+                  "value": "",
+                },
+                Object {
+                  "name": "channel",
+                  "type": "id",
+                  "value": "",
+                },
+              ],
+              "channel": "810837502151622666",
+              "client": Object {
+                "channels": Array [],
+                "guilds": Array [],
+                "shard": null,
+                "user": null,
+                "users": Array [],
+              },
+              "descr": "Trigger when a message is received in a channel",
+              "id": 0,
+              "name": "DiscordRcv",
+              "token": "ODA5ODEzOTE2NDk0MzMxOTQ2.YCaj-w.NFGJKd1U2oq_KLRUhk3UFsoOYIs",
+            },
+          ],
+          "color": "#7289da",
+          "id": 1,
+          "logo": "https://www.freepnglogos.com/uploads/discord-logo-png/concours-discord-cartes-voeux-fortnite-france-6.png",
+          "name": "Discord",
+          "reaction": Array [
+            Object {
+              "arg": Array [
+                Object {
+                  "name": "body",
+                  "type": "text",
+                  "value": "",
+                },
+                Object {
+                  "name": "token",
+                  "type": "id",
+                  "value": "",
+                },
+                Object {
+                  "name": "channel",
+                  "type": "id",
+                  "value": "",
+                },
+              ],
+              "auth": "",
+              "body": "test",
+              "channel": "810837502151622666",
+              "client": Object {
+                "channels": Array [],
+                "guilds": Array [],
+                "shard": null,
+                "user": null,
+                "users": Array [],
+              },
+              "descr": "Send a message on a channel",
+              "id": 0,
+              "isActivated": true,
+              "name": "DiscordMsg",
+              "token": "ODA5ODEzOTE2NDk0MzMxOTQ2.YCaj-w.NFGJKd1U2oq_KLRUhk3UFsoOYIs",
+            },
+          ],
+        },
+        Object {
+          "action": Array [
+            Object {
+              "arg": Array [
+                Object {
+                  "name": "channel",
+                  "type": "id",
+                  "value": "",
+                },
+              ],
+              "descr": "Trigger when a new Video is posted in a channel",
+              "id": 0,
+              "name": "newVideo",
+              "videos": Array [],
+            },
+          ],
+          "color": "#FF0000",
+          "id": 2,
+          "logo": "https://assets.ifttt.com/images/channels/32/icons/monochrome_large.png",
+          "name": "Youtube",
+          "reaction": Array [],
+        },
+        Object {
+          "action": Array [
+            Object {
+              "arg": Array [
+                Object {
+                  "name": "hashtag",
+                  "type": "id",
+                  "value": "",
+                },
+                Object {
+                  "name": "hashtag",
+                  "type": "id",
+                  "value": "",
+                },
+              ],
+              "descr": "trigger when a tweet with a certain tag is posted",
+              "id": 0,
+              "name": "getTweet",
+            },
+          ],
+          "color": "#08a0e9",
+          "id": 3,
+          "logo": "https://assets.ifttt.com/images/channels/2/icons/monochrome_large.png",
+          "name": "Twitter",
+          "reaction": Array [
+            Object {
+              "arg": Array [
+                Object {
+                  "name": "body",
+                  "type": "text",
+                  "value": Array [],
+                },
+              ],
+              "auth": "",
+              "descr": "post a tweet on twitter",
+              "id": 0,
+              "isActivated": true,
+              "name": "postTweet",
+            },
+          ],
+        },
+        Object {
+          "action": Array [
+            Object {
+              "arg": Array [
+                Object {
+                  "name": "google",
+                  "type": "oauth",
+                  "value": "",
+                },
+              ],
+              "auth": "",
+              "descr": "Trigger quand l'utilisateur reçoit un mail",
+              "id": 0,
+              "message": Array [],
+              "name": "newMail",
+            },
+          ],
+          "color": "#FF0000",
+          "id": 4,
+          "logo": "https://assets.ifttt.com/images/channels/6/icons/monochrome_large.png",
+          "name": "Gmail",
+          "reaction": Array [
+            Object {
+              "arg": Array [
+                Object {
+                  "name": "receiver",
+                  "type": "id",
+                  "value": "",
+                },
+                Object {
+                  "name": "subject",
+                  "type": "id",
+                  "value": "",
+                },
+                Object {
+                  "name": "message",
+                  "type": "text",
+                  "value": "",
+                },
+                Object {
+                  "name": "google",
+                  "type": "oauth",
+                  "value": "",
+                },
+              ],
+              "auth": "",
+              "descr": "Envoie un mail à l'utilisateur X",
+              "id": 0,
+              "isActivated": true,
+              "name": "sendMail",
+            },
+          ],
+        },
+        Object {
+          "action": Array [
+            Object {
+              "arg": Array [
+                Object {
+                  "name": "username",
+                  "type": "id",
+                  "value": Array [],
+                },
+                Object {
+                  "name": "password",
+                  "type": "id",
+                  "value": Array [],
+                },
+                Object {
+                  "name": "Subreddit",
+                  "type": "id",
+                  "value": Array [],
+                },
+              ],
+              "descr": "Flag when there is a new post on the subreddit",
+              "id": 0,
+              "name": "getReddit",
+              "post": Array [],
+              "r": Object {
+                "_config": Object {
+                  "continueAfterRatelimitError": false,
+                  "debug": false,
+                  "endpointDomain": "reddit.com",
+                  "maxRetryAttempts": 3,
+                  "proxies": true,
+                  "requestDelay": 0,
+                  "requestTimeout": 30000,
+                  "retryErrorCodes": Array [
+                    502,
+                    503,
+                    504,
+                    522,
+                  ],
+                  "warnings": true,
+                },
+                "_nextRequestTimestamp": null,
+                "accessToken": null,
+                "clientId": "DmIrk5G1pBjEXg",
+                "clientSecret": "W5Rrlb0xp_ujYaGtv0cUF-bFGXgwaw",
+                "password": "T8Q4Ckdb3GXaVFb",
+                "ratelimitExpiration": null,
+                "ratelimitRemaining": null,
+                "refreshToken": null,
+                "scope": null,
+                "tokenExpiration": null,
+                "userAgent": "Whatever",
+                "username": "Antique_Literature94",
+              },
+            },
+            Object {
+              "arg": Array [
+                Object {
+                  "name": "username",
+                  "type": "id",
+                  "value": Array [],
+                },
+                Object {
+                  "name": "password",
+                  "type": "id",
+                  "value": Array [],
+                },
+                Object {
+                  "name": "Name of the user",
+                  "type": "id",
+                  "value": Array [],
+                },
+              ],
+              "descr": "Flag when you got a new Trophies",
+              "id": 1,
+              "name": "getTrophiesReddit",
+              "r": Object {
+                "_config": Object {
+                  "continueAfterRatelimitError": false,
+                  "debug": false,
+                  "endpointDomain": "reddit.com",
+                  "maxRetryAttempts": 3,
+                  "proxies": true,
+                  "requestDelay": 0,
+                  "requestTimeout": 30000,
+                  "retryErrorCodes": Array [
+                    502,
+                    503,
+                    504,
+                    522,
+                  ],
+                  "warnings": true,
+                },
+                "_nextRequestTimestamp": null,
+                "accessToken": null,
+                "clientId": "DmIrk5G1pBjEXg",
+                "clientSecret": "W5Rrlb0xp_ujYaGtv0cUF-bFGXgwaw",
+                "password": "T8Q4Ckdb3GXaVFb",
+                "ratelimitExpiration": null,
+                "ratelimitRemaining": null,
+                "refreshToken": null,
+                "scope": null,
+       ...(truncated to the first 10000 characters)
+  

@@ -1,0 +1,41 @@
+<!doctype html>
+<style>
+  
+</style>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/main.css') }}">
+        <link rel="icon" href="https://pics.me.me/thumb_nope-tf2-engineer-nope-meme-www-imagessure-com-53745125.png">
+        <title>CHOOSE ACTION</title>
+    </head>
+    <body>
+        <div style="z-index:1;position:absolute;left:50px;top:50px;">
+            <a class="button" href="{{ url_for('service') }}">
+                &lt; BACK
+            </a>
+        </div>
+        <div style="z-index:0;position:absolute;left:0px;top:50px;height:200px;width:100%;text-align:center;">
+            <h1 style="z-index:1;">Choose an action</h1>
+            <h2 style="z-index:1;">{{ data["services"][n]["name"] }}</h2>
+            <img src="{{ data["services"][n]["logo"] }}" style="z-index:1;height:150px;width:150px;">
+        </div>
+            
+        <div style="z-index:0;position:absolute;left:0px;top:400px;height:100%;width:100%;display: flex;justify-content: center;">
+            <div style="height:1200px;width:1200px;display: grid;grid-template-columns: repeat(1, 240px);grid-template-rows: 240px 240px;grid-column-gap: 0px;grid-row-gap: 0px;">
+                {% for a in data["services"][n]["action"] %}
+                    <div style="height:240px;width:1200px;color: white;font-weight: 700;border: solid white 2px;background-color:{{ data["services"][n]["color"] }};">
+                        <p style="z-index:1;position:relative;left:40px;bottom:0px;font-size:30px;">{{ a.name }}</p>
+                        <p style="z-index:1;position:relative;left:40px;bottom:-50px;font-size:20px;">{{ a.descr }}</p>
+                        <div style="z-index:1;position:relative;left:980px;top:-80px;">
+                            <a class="button" href="{{ url_for('config_action', s=n, a=a.id) }}">
+                                CHOOSE
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </body>
+</html>

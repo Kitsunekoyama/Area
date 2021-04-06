@@ -1,0 +1,46 @@
+<!doctype html>
+<style>
+  
+</style>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/main.css') }}">
+        <link rel="icon" href="https://pics.me.me/thumb_nope-tf2-engineer-nope-meme-www-imagessure-com-53745125.png">
+        <title>CONFIGURE YOUR ACTION</title>
+    </head>
+    <body>
+        <div style="z-index:1;position:absolute;left:50px;top:50px;">
+            <a class="button" href="{{ url_for('action', n=s) }}">
+                &lt; BACK
+            </a>
+        </div>
+        <div style="z-index:0;position:absolute;left:0px;top:50px;height:200px;width:100%;text-align:center;">
+            <h1 style="z-index:1;">Configure your action</h1>
+            <h2 style="z-index:1;">{{ data["services"][s]["name"] }}</h2>
+            <img src="{{ data["services"][s]["logo"] }}" style="z-index:1;height:150px;width:150px;">
+            <h3 style="z-index:1;">{{ data["services"][s]["action"][a]["descr"] }}</h3>
+        </div>
+        <div style="z-index:0;position:absolute;left:0px;top:500px;height:100%;width:100%;display: flex;justify-content: center;">
+            <div style="height:1200px;width:1200px;color: white;font-weight: 700;border: solid white 2px;background-color:{{ data["services"][s]["color"] }};padding-left: 20px;">
+                <form action="{{ url_for('reaction', s=s, a=a) }}" method="post">
+                    {% for w in data["services"][s]["action"][a]["arg"] %}
+                        {% if w.type == "id" %}
+                            <p style="z-index:1;font-size:30px;">{{ w.name }}</p>
+                            <input type="text" name="info[]" requiredminlength="4" maxlength="60" size="60">
+                        {% endif %}
+                        {% if w.type == "text" %}
+                            <p style="z-index:1;font-size:30px;">{{ w.name }}</p>
+                            <textarea type="text" name="info[]" rows="5" cols="33"></textarea>
+                        {% endif %}
+                        {% if w.type == "oauth" %}
+                            <p style="z-index:1;font-size:30px;">login to {{ w.name }}</p>
+                        {% endif %}
+                    {% endfor %}
+                    <br>
+                    <button type="submit">Send Info</button>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>
